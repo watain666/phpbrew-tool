@@ -1,0 +1,62 @@
+#!/bin/bash
+# Usage: bash phpbrewswitch
+
+i=1
+c=1
+options=()
+while [ $c -gt 0 ]
+do
+    v=$(phpbrew list | sed -n "${i}p")
+    if [ -z "$v" ]; then
+        c=0
+    elif [ -n "$v" ]; then
+        options+=("$v")
+    fi
+    i=$[$i+1]
+done
+
+count=0
+printf "\n"
+echo 'Available versions:'
+for i in "${options[@]}"
+do
+ echo "$i $[$count+1]"
+ count=$[$count+1]
+done
+
+printf "\n"
+while true; do
+
+    echo 'Which version should be enabled?'
+    read selected
+    
+    if (( $selected > $count )); then
+        echo 'You selected a wrong number'
+    else
+        break
+    fi;
+done
+
+chosen="${options[$selected - 1]}"
+chosen="$(echo -e "${chosen}" | tr -d '[:space:]')"
+chosen="$(echo -e "${chosen}" | sed 's/\*//g')"
+chosen="$(echo -e "${chosen}" | sed 's/php-//g')"
+echo -e "php-${chosen} to be enabled."
+
+source $HOME/.phpbrew/bashrc
+phpbrew switch php-${chosen}
+
+if [[ $chosen =~ ^5 ]]; then
+    sudo a2dismod php7
+    sudo a2enmod php5
+    systemctl restart apache2
+    echo "restart apache2 success"
+elif [[ $chosen =~ ^7 ]]; then
+    sudo a2dismod php5
+    sudo a2enmod php7
+    systemctl restart apache2
+    echo "restart apache2 success"
+else
+    echo 'This script only works on php 5 and 7';
+fi;
+
