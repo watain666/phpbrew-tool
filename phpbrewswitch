@@ -16,22 +16,27 @@ do
 done
 
 count=0
-printf "\n"
+
+echo ''
 echo 'Available versions:'
 for i in "${options[@]}"
 do
- echo "$i $[$count+1]"
- count=$[$count+1]
+    echo "$[$count+1] $i"
+    count=$[$count+1]
 done
 
-printf "\n"
+echo ''
+
 while true; do
 
     echo 'Which version should be enabled?'
+    echo 'Just type a number then press enter.'
     read selected
-    
+
     if (( $selected > $count )); then
-        echo 'You selected a wrong number'
+        echo "${selected} isn't on the list!"
+        echo "please type before php version number"
+        echo ''
     else
         break
     fi;
@@ -41,22 +46,39 @@ chosen="${options[$selected - 1]}"
 chosen="$(echo -e "${chosen}" | tr -d '[:space:]')"
 chosen="$(echo -e "${chosen}" | sed 's/\*//g')"
 chosen="$(echo -e "${chosen}" | sed 's/php-//g')"
-echo -e "php-${chosen} to be enabled."
+echo -e "\nphp-${chosen} to be enabled."
 
-source $HOME/.phpbrew/bashrc
-phpbrew switch php-${chosen}
+SOFILE=/usr/lib/apache2/modules/libphp${chosen}.so
+CONFFILE5=/etc/apache2/mods-available/php5.load
+CONFFILE7=/etc/apache2/mods-available/php7.load
+
+source ~/.phpbrew/bashrc
+
+if [ -f $SOFILE ]; then
+    phpbrew switch php-${chosen} 
+    phpbrew list
+else
+    echo "${SOFILE} isn't a file"
+fi;
 
 if [[ $chosen =~ ^5 ]]; then
-    sudo a2dismod php7
-    sudo a2enmod php5
-    systemctl restart apache2
-    echo "restart apache2 success"
+    FILECONTENTS="LoadModule php5_module $SOFILE"
+    CONFFILE=$CONFFILE5	
+    sudo a2dismod php7 -q
+    sudo a2enmod php5 -q
 elif [[ $chosen =~ ^7 ]]; then
-    sudo a2dismod php5
-    sudo a2enmod php7
-    systemctl restart apache2
-    echo "restart apache2 success"
+    FILECONTENTS="LoadModule php7_module $SOFILE"
+    CONFFILE=$CONFFILE7
+    sudo a2dismod php5 -q
+    sudo a2enmod php7 -q
 else
     echo 'This script only works on php 5 and 7';
+    exit
 fi;
+
+echo $FILECONTENTS > $CONFFILE
+echo "AddType application/x-httpd-php .php" >> $CONFFILE
+echo "Updated $CONFFILE"
+sudo systemctl restart apache2
+echo "Restart apache2 success!"
 
