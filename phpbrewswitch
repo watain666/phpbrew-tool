@@ -55,7 +55,7 @@ CONFFILE7=/etc/apache2/mods-available/php7.load
 source ~/.phpbrew/bashrc
 
 if [ -f $SOFILE ]; then
-    phpbrew switch php-${chosen} 
+    phpbrew switch php-${chosen}
     phpbrew list
 else
     echo "${SOFILE} isn't a file"
@@ -63,7 +63,7 @@ fi;
 
 if [[ $chosen =~ ^5 ]]; then
     FILECONTENTS="LoadModule php5_module $SOFILE"
-    CONFFILE=$CONFFILE5	
+    CONFFILE=$CONFFILE5
     sudo a2dismod php7 -q
     sudo a2enmod php5 -q
 elif [[ $chosen =~ ^7 ]]; then
@@ -79,6 +79,10 @@ fi;
 echo $FILECONTENTS > $CONFFILE
 echo "AddType application/x-httpd-php .php" >> $CONFFILE
 echo "Updated $CONFFILE"
-sudo systemctl restart apache2
-echo "Restart apache2 success!"
 
+sudo systemctl restart apache2
+if [[ $? -eq 0 ]]; then
+    echo 'Restart apache2 success!'
+else
+    echo 'Restart apache2 failure!'
+fi;
