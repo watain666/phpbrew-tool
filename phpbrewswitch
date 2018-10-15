@@ -46,7 +46,9 @@ chosen="${options[$selected - 1]}"
 chosen="$(echo -e "${chosen}" | tr -d '[:space:]')"
 chosen="$(echo -e "${chosen}" | sed 's/\*//g')"
 chosen="$(echo -e "${chosen}" | sed 's/php-//g')"
+
 echo -e "\nphp-${chosen} to be enabled."
+echo 'Need sudo permission for a2dismod/a2enmod/systemctl'
 
 SOFILE=/usr/lib/apache2/modules/libphp${chosen}.so
 CONFFILE5=/etc/apache2/mods-available/php5.load

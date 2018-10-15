@@ -46,14 +46,14 @@ export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 # this command doesn't work
 # phpbrew -d install php-5.6.38 +default +openssl=shared
 # to install default extensions and apxs2 and openssl and xdebug, we have to use the following command
-phpbrew -d install php-5.6.38 +default +apxs2 -- --with-openssl=shared
+phpbrew -d install php-5.6.38 +default +pdo +mysql +apxs2 -- --with-openssl=shared
 phpbrew use php-5.6.38
 phpbrew -d ext install openssl 
 phpbrew -d ext install xdebug 2.2.7
 
 # phpbrew -d install php-7.2.10 +default +openssl=shared
 # to install default extensions and apxs2 and openssl and xdebug, we have to use the following command
-phpbrew -d install php-7.2.10 +default +apxs2 -- --with-openssl=shared
+phpbrew -d install php-7.2.10 +default +pdo +mysql +apxs2 -- --with-openssl=shared
 phpbrew use php-7.2.10
 phpbrew -d ext install openssl
 phpbrew -d ext install xdebug
