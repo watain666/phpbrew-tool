@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Instal php5.6 with phpbrew on ubuntu 18.04
 
 # Install all dependencies
