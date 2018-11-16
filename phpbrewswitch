@@ -24,7 +24,6 @@ do
     echo "$[$count+1] $i"
     count=$[$count+1]
 done
-
 echo ''
 
 while true; do
@@ -47,30 +46,29 @@ chosen="$(echo -e "${chosen}" | tr -d '[:space:]')"
 chosen="$(echo -e "${chosen}" | sed 's/\*//g')"
 chosen="$(echo -e "${chosen}" | sed 's/php-//g')"
 
-echo -e "\nphp-${chosen} to be enabled."
-echo 'Need sudo permission for a2dismod/a2enmod/systemctl'
-
-SOFILE=/usr/lib/apache2/modules/libphp${chosen}.so
-CONFFILE5=/etc/apache2/mods-available/php5.load
-CONFFILE7=/etc/apache2/mods-available/php7.load
+sofile=/usr/lib/apache2/modules/libphp${chosen}.so
+conffile5=/etc/apache2/mods-available/php5.load
+conffile7=/etc/apache2/mods-available/php7.load
 
 source ~/.phpbrew/bashrc
 
-if [ -f $SOFILE ]; then
+if [ -f $sofile ]; then
     phpbrew switch php-${chosen}
     phpbrew list
+    echo "php-${chosen} to be enabled."
+    echo 'Need sudo permission for a2dismod/a2enmod/systemctl'
 else
-    echo "${SOFILE} isn't a file"
+    echo "${sofile} isn't a file"
 fi;
 
 if [[ $chosen =~ ^5 ]]; then
-    FILECONTENTS="LoadModule php5_module $SOFILE"
-    CONFFILE=$CONFFILE5
+    filecontents="LoadModule php5_module $sofile"
+    conffile=$conffile5
     sudo a2dismod php7 -q
     sudo a2enmod php5 -q
 elif [[ $chosen =~ ^7 ]]; then
-    FILECONTENTS="LoadModule php7_module $SOFILE"
-    CONFFILE=$CONFFILE7
+    filecontents="LoadModule php7_module $sofile"
+    conffile=$conffile7
     sudo a2dismod php5 -q
     sudo a2enmod php7 -q
 else
@@ -78,9 +76,9 @@ else
     exit
 fi;
 
-echo $FILECONTENTS > $CONFFILE
-echo "AddType application/x-httpd-php .php" >> $CONFFILE
-echo "Updated $CONFFILE"
+echo $filecontents > $conffile
+echo "AddType application/x-httpd-php .php" >> $conffile
+echo "Updated $conffile"
 
 sudo systemctl restart apache2
 if [[ $? -eq 0 ]]; then
